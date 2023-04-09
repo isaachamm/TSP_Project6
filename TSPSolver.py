@@ -296,4 +296,114 @@ class TSPSolver:
 	'''
 
     def fancy(self, time_allowance=60.0):
-        pass
+
+        # todo: change time allowance for all functions when we test
+
+        results = {}
+        cities = self._scenario.getCities()
+        ncities = len(cities)
+        foundTour = False
+        bssf_updated_count = 0
+        max_states_held = 0
+        total_states_made = 0
+        states_pruned = 0
+
+        # Get our initial BSSF from greedy, or if that doesn't work, do random
+        bssf = TSPSolver.greedy(self)["soln"]
+        if bssf.cost == math.inf:
+            bssf = TSPSolver.defaultRandomTour(self)["soln"]
+
+        # The bssf_matrix allows us to compare bssf without having to create the solution every time --
+        #   we only make it once at the end of the algorithm
+        bssf_matrix = Matrix(ncities)
+        if bssf.cost < math.inf:
+            foundTour = True
+            bssf_matrix.cost_of_matrix = bssf.cost
+
+        start_time = time.time()
+
+        # todo: change these to 51 for generation limit, 1001 for num children
+        generations = 0
+        generations_limit = 5
+        solutions = []
+        num_children = 10
+
+        for i in range(num_children):
+            random_solution = TSPSolver.defaultRandomTour(self)['soln']
+            new_solution = GA_Solution(random_solution.route, random_solution.cost)
+            solutions.append(new_solution)
+
+        for i in range(num_children):
+            child_solution = self.mutation(solutions[i])
+            solutions.append(child_solution)
+
+        for i in range(num_children - 1):
+
+            solutions.extend(self.crossover(solutions[i], solutions[i + 1]))
+
+        # todo:
+        # add in probabilities to guide our GA
+        # for loop for generation number:
+        #       crossover
+        #       mutation
+        #       survival
+        #           bssf checks
+
+        # This checks that our greedy algorithm wasn't the optimal solution
+        # todo – update this for fancy
+        if bssf_matrix.state_id != math.inf:
+            route = []
+            for city in bssf_matrix.cities_visited:
+                route.append(cities[city])
+            bssf = TSPSolution(route)
+
+        minimum_sol = GA_Solution()
+        for solution in solutions:
+            if solution.cost_of_solution < minimum_sol.cost_of_solution:
+                minimum_sol = solution
+
+        bssf = TSPSolution(minimum_sol.cities_visited)
+
+        end_time = time.time()
+        results['cost'] = bssf.cost if foundTour else math.inf
+        results['time'] = end_time - start_time
+        results['count'] = bssf_updated_count
+        results['soln'] = bssf
+        results['max'] = max_states_held
+        results['total'] = total_states_made
+        results['pruned'] = states_pruned
+        return results
+
+    def mutation(self, route):
+        index1 = random.randint(0, len(route.cities_visited) - 1)
+        index2 = random.randint(0, len(route.cities_visited) - 1)
+        route.cities_visited[index1], route.cities_visited[index2] = route.cities_visited[index2], route.cities_visited[
+            index1]
+
+        route.calculate_cost()
+
+        return route
+
+    def crossover(self, parent1, parent2):
+        splice_index = random.randint(0, len(parent1.cities_visited) - 1)
+
+        spliced_route1 = parent1.cities_visited[:splice_index]
+        spliced_route2 = parent2.cities_visited[:splice_index]
+
+        child_route1 = GA_Solution()
+        child_route2 = GA_Solution()
+
+        # todo: how to append lists as items instead of lists
+        for i in range(len(parent1.cities_visited)):
+            if parent2.cities_visited[i] not in spliced_route1:
+                child_route1.cities_visited.append(parent2.cities_visited[i])
+            if parent1.cities_visited[i] not in spliced_route2:
+                child_route2.cities_visited.append(parent1.cities_visited[i])
+
+        child_route1.cities_visited.extend(spliced_route1)
+        child_route2.cities_visited.extend(spliced_route2)
+
+        child_route1.calculate_cost()
+        child_route2.calculate_cost()
+
+        return child_route1, child_route2

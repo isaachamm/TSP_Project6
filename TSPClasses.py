@@ -245,3 +245,27 @@ class Matrix:
 
         # Set the matrix's cost to the new reduction cost
         self.set_cost(reduction_cost)
+
+
+class GA_Solution:
+
+    def __init__(self, route=None, cost=math.inf):
+        if route is None:
+            route = []
+        self.cities_visited = route
+        self.cities_unvisited = []
+        self.cost_of_solution = cost
+
+    def add_city(self, index_to_delete):
+        self.cities_visited.append(self.cities_unvisited[index_to_delete])
+        self.cities_unvisited[index_to_delete] = self.cities_univisted[-1]
+        self.cities_univisted.pop()
+
+    def calculate_cost(self):
+        cost = 0
+        last = self.cities_visited[0]
+        for city in self.cities_visited[1:]:
+            cost += last.costTo(city)
+            last = city
+        cost += self.cities_visited[-1].costTo(self.cities_visited[0])
+        self.cost_of_solution = cost
