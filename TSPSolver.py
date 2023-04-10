@@ -324,7 +324,7 @@ class TSPSolver:
 
         # todo: change these to 51 for generation limit, 1001 for num children
         generations = 0
-        generations_limit = 5
+        generations_limit = 21
         solutions = []
         num_children = 10
 
@@ -333,22 +333,26 @@ class TSPSolver:
             new_solution = GA_Solution(random_solution.route, random_solution.cost)
             solutions.append(new_solution)
 
-        for i in range(num_children):
-            child_solution = self.mutation(solutions[i])
-            solutions.append(child_solution)
+        generations += 1
 
-        for i in range(num_children - 1):
+        while generations != generations_limit:
+            for i in range(num_children):
+                child_solution = self.mutation(solutions[i])
+                solutions.append(child_solution)
 
-            solutions.extend(self.crossover(solutions[i], solutions[i + 1]))
+            for i in range(num_children - 1):
+                solutions.extend(self.crossover(solutions[i], solutions[i + 1]))
 
-        for solution in solutions:
-            if solution.cost_of_solution == math.inf:
-                solutions.remove(solution)
-            elif solution.cost_of_solution < bssf_solution.cost_of_solution:
-                bssf_solution = solution
-                foundTour = True
+            for solution in solutions:
+                if solution.cost_of_solution == math.inf:
+                    solutions.remove(solution)
+                elif solution.cost_of_solution < bssf_solution.cost_of_solution:
+                    bssf_solution = solution
+                    foundTour = True
+                    bssf_updated_count += 1
 
-        self.survival(solutions)
+            solutions = self.survival(solutions)
+            generations += 1
 
         # todo:
         # add in probabilities to guide our GA
@@ -363,7 +367,6 @@ class TSPSolver:
         if foundTour:
             route = []
             for city in bssf_solution.cities_visited:
-                # route.append(cities[city])
                 route.append(city)
             bssf = TSPSolution(route)
 
@@ -378,6 +381,7 @@ class TSPSolver:
         return results
 
     def mutation(self, route):
+
         index1 = random.randint(0, len(route.cities_visited) - 1)
         index2 = random.randint(0, len(route.cities_visited) - 1)
         route.cities_visited[index1], route.cities_visited[index2] = route.cities_visited[index2], route.cities_visited[
@@ -421,7 +425,9 @@ class TSPSolver:
 
             weights = []
             player = []
-            for i in range(bucket_size // number_of_wanted_children):
+            wanted_num = bucket_size // number_of_wanted_children
+
+            for i in range(wanted_num):
                 j = random.randint(0, len(list_of_children) - 1)
                 player.append(list_of_children[j])
                 list_of_children[j] = list_of_children[-1]
@@ -435,7 +441,10 @@ class TSPSolver:
                     counter -= 5
                 weights.append(counter)
 
-            survivors.extend(random.choices(player, weights))
+            if len(weights) == 1:
+                survivors.extend(player)
+            else:
+                survivors.extend(random.choices(player, weights))
 
         return survivors
 
