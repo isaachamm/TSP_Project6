@@ -417,11 +417,11 @@ class TSPSolver:
         survivors = []
         bucket_size = len(list_of_children)
 
-        while len(survivors) != 10:
+        while len(survivors) != number_of_wanted_children:
 
             weights = []
             player = []
-            for i in range(bucket_size // 10):
+            for i in range(bucket_size // number_of_wanted_children):
                 j = random.randint(0, len(list_of_children) - 1)
                 player.append(list_of_children[j])
                 list_of_children[j] = list_of_children[-1]
