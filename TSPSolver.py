@@ -341,6 +341,8 @@ class TSPSolver:
 
             solutions.extend(self.crossover(solutions[i], solutions[i + 1]))
 
+        self.survival(solutions)
+
         # todo:
         # add in probabilities to guide our GA
         # for loop for generation number:
@@ -407,3 +409,36 @@ class TSPSolver:
         child_route2.calculate_cost()
 
         return child_route1, child_route2
+
+    def survival(self, list_of_children):
+        number_of_wanted_children = 10
+
+        survivors = []
+        weights = []
+
+        while len(survivors) != 10:
+            counter = 100
+            player = []
+            for i in range(len(list_of_children) // 10):
+                j = random.randint(0, len(list_of_children) - 1)
+                player.append(list_of_children[j])
+                list_of_children[j] = list_of_children[-1]
+                list_of_children.pop()
+
+            player.sort(key=lambda x: x.cost_of_solution)
+
+            for i in range(len(player)):
+                if counter == 0:
+                    counter += 5
+                counter -= 5
+                weights.append(counter)
+
+            survivors.append(random.choices(player, weights))
+
+
+
+
+
+
+
+
