@@ -315,10 +315,10 @@ class TSPSolver:
 
         # The bssf_matrix allows us to compare bssf without having to create the solution every time --
         #   we only make it once at the end of the algorithm
-        bssf_matrix = Matrix(ncities)
         if bssf.cost < math.inf:
-            foundTour = True
-            bssf_matrix.cost_of_matrix = bssf.cost
+            bssf_solution = GA_Solution(bssf.route, bssf.cost)
+        else:
+            bssf_solution = GA_Solution()
 
         start_time = time.time()
 
@@ -341,6 +341,13 @@ class TSPSolver:
 
             solutions.extend(self.crossover(solutions[i], solutions[i + 1]))
 
+        for solution in solutions:
+            if solution.cost_of_solution == math.inf:
+                solutions.remove(solution)
+            elif solution.cost_of_solution < bssf_solution.cost_of_solution:
+                bssf_solution = solution
+                foundTour = True
+
         self.survival(solutions)
 
         # todo:
@@ -353,22 +360,15 @@ class TSPSolver:
 
         # This checks that our greedy algorithm wasn't the optimal solution
         # todo – update this for fancy
-        if bssf_matrix.state_id != math.inf:
+        if foundTour:
             route = []
-            for city in bssf_matrix.cities_visited:
-                route.append(cities[city])
+            for city in bssf_solution.cities_visited:
+                # route.append(cities[city])
+                route.append(city)
             bssf = TSPSolution(route)
 
-        minimum_sol = GA_Solution()
-        for solution in solutions:
-            if solution.cost_of_solution < minimum_sol.cost_of_solution:
-                minimum_sol = solution
-
-        if minimum_sol.cost_of_solution != math.inf:
-            bssf = TSPSolution(minimum_sol.cities_visited)
-
         end_time = time.time()
-        results['cost'] = bssf.cost if foundTour else math.inf
+        results['cost'] = bssf.cost
         results['time'] = end_time - start_time
         results['count'] = bssf_updated_count
         results['soln'] = bssf
@@ -436,6 +436,8 @@ class TSPSolver:
                 weights.append(counter)
 
             survivors.extend(random.choices(player, weights))
+
+        return survivors
 
 
 
