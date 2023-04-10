@@ -337,7 +337,7 @@ class TSPSolver:
 
         while generations != generations_limit:
             for i in range(num_children):
-                child_solution = self.mutation(solutions[i])
+                child_solution = self.mutation(solutions[i], generations, generations_limit)
                 solutions.append(child_solution)
 
             for i in range(num_children - 1):
@@ -380,14 +380,27 @@ class TSPSolver:
         results['pruned'] = states_pruned
         return results
 
-    def mutation(self, route):
+    def mutation(self, route, generation, generation_limit):
 
-        index1 = random.randint(0, len(route.cities_visited) - 1)
-        index2 = random.randint(0, len(route.cities_visited) - 1)
-        route.cities_visited[index1], route.cities_visited[index2] = route.cities_visited[index2], route.cities_visited[
-            index1]
+        random_num = random.randint(0, 100)
+        if generation <= 1:
+            mutate_amount = 25
+        elif generation <= (generation_limit // 4):
+            mutate_amount = 50
+        elif generation <= (generation_limit // 2):
+            mutate_amount = 75
+        elif generation <= (generation_limit // 1.5):
+            mutate_amount = 85
+        else:
+            mutate_amount = 95
 
-        route.calculate_cost()
+        if random_num < mutate_amount:
+            index1 = random.randint(0, len(route.cities_visited) - 1)
+            index2 = random.randint(0, len(route.cities_visited) - 1)
+            route.cities_visited[index1], route.cities_visited[index2] = route.cities_visited[index2], route.cities_visited[
+                index1]
+
+            route.calculate_cost()
 
         return route
 
