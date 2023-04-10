@@ -414,12 +414,13 @@ class TSPSolver:
         number_of_wanted_children = 10
 
         survivors = []
-        weights = []
+        bucket_size = len(list_of_children)
 
         while len(survivors) != 10:
-            counter = 100
+
+            weights = []
             player = []
-            for i in range(len(list_of_children) // 10):
+            for i in range(bucket_size // 10):
                 j = random.randint(0, len(list_of_children) - 1)
                 player.append(list_of_children[j])
                 list_of_children[j] = list_of_children[-1]
@@ -427,10 +428,10 @@ class TSPSolver:
 
             player.sort(key=lambda x: x.cost_of_solution)
 
+            counter = len(player) * 5
             for i in range(len(player)):
-                if counter == 0:
-                    counter += 5
-                counter -= 5
+                if counter != 0:
+                    counter -= 5
                 weights.append(counter)
 
             survivors.append(random.choices(player, weights))
