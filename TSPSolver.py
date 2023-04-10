@@ -364,7 +364,8 @@ class TSPSolver:
             if solution.cost_of_solution < minimum_sol.cost_of_solution:
                 minimum_sol = solution
 
-        bssf = TSPSolution(minimum_sol.cities_visited)
+        if minimum_sol.cost_of_solution != math.inf:
+            bssf = TSPSolution(minimum_sol.cities_visited)
 
         end_time = time.time()
         results['cost'] = bssf.cost if foundTour else math.inf
@@ -434,7 +435,7 @@ class TSPSolver:
                     counter -= 5
                 weights.append(counter)
 
-            survivors.append(random.choices(player, weights))
+            survivors.extend(random.choices(player, weights))
 
 
 
