@@ -297,8 +297,6 @@ class TSPSolver:
 
     def fancy(self, time_allowance=60.0):
 
-        # todo: change time allowance for all functions when we test
-
         results = {}
         cities = self._scenario.getCities()
         ncities = len(cities)
@@ -322,11 +320,11 @@ class TSPSolver:
 
         start_time = time.time()
 
-        # todo: change these to 51 for generation limit, 1001 for num children
+        # This controls how long and deep we want our GA to search for
         generations = 0
-        generations_limit = 21
+        generations_limit = 51
         solutions = []
-        num_children = 10
+        num_children = 100
 
         for i in range(num_children):
             random_solution = TSPSolver.defaultRandomTour(self)['soln']
@@ -335,7 +333,7 @@ class TSPSolver:
 
         generations += 1
 
-        while generations != generations_limit:
+        while generations != generations_limit and time.time() - start_time < time_allowance:
             for i in range(num_children):
                 child_solution = self.mutation(solutions[i], generations, generations_limit)
                 solutions.append(child_solution)
@@ -347,26 +345,18 @@ class TSPSolver:
                 if solution.cost_of_solution == math.inf:
                     solutions.remove(solution)
                 elif solution.cost_of_solution < bssf_solution.cost_of_solution:
-                    bssf_solution = solution
+                    bssf_solution = GA_Solution(solution.cities_visited.copy(), solution.cost_of_solution)
+                    bssf = TSPSolution(solution.cities_visited.copy())
                     foundTour = True
                     bssf_updated_count += 1
 
             solutions = self.survival(solutions)
             generations += 1
 
-        # todo:
-        # add in probabilities to guide our GA
-        # for loop for generation number:
-        #       crossover
-        #       mutation
-        #       survival
-        #           bssf checks
-
         # This checks that our greedy algorithm wasn't the optimal solution
-        # todo – update this for fancy
         if foundTour:
             route = []
-            for city in bssf_solution.cities_visited:
+            for city in bssf.route:
                 route.append(city)
             bssf = TSPSolution(route)
 
