@@ -325,9 +325,11 @@ class TSPSolver:
 
         # This controls how long and deep we want our GA to search for
         generations = 0
-        generations_limit = ncities * 3
+        generations_limit = round((0.0000233385 * (ncities ** 5)) + 23.0863)
+        # generations_limit = round((0.011492 * (ncities ** 3)) + 7.59556)
+        # generations_limit = ncities * 9
         solutions = []
-        num_children = ncities * 6
+        num_children = generations_limit * 2
 
         for i in range(num_children):
             random_solution = TSPSolver.defaultRandomTour(self)['soln']
@@ -353,7 +355,7 @@ class TSPSolver:
                     foundTour = True
                     bssf_updated_count += 1
 
-            solutions = self.survival(solutions, ncities)
+            solutions = self.survival(solutions, num_children)
             generations += 1
 
         # This checks that our greedy algorithm wasn't the optimal solution
@@ -421,8 +423,8 @@ class TSPSolver:
 
         return child_route1, child_route2
 
-    def survival(self, list_of_children, ncities):
-        number_of_wanted_children = ncities * 6
+    def survival(self, list_of_children, num_survive):
+        number_of_wanted_children = num_survive
 
         survivors = []
         bucket_size = len(list_of_children)
