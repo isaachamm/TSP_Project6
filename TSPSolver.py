@@ -80,7 +80,7 @@ class TSPSolver:
 		algorithm</returns>
 	'''
 
-    def greedy(self, time_allowance=60.0):
+    def greedy(self, time_allowance=60.0, initial_start_city = 0):
 
         results = {}
         cities = self._scenario.getCities()
@@ -96,10 +96,9 @@ class TSPSolver:
 
         # This variable changes our start city until the algorithm finds a route -- different start cities give
         #   different routes, so this helps us find a route if our initial attempt doesn't work
-        city_counter = 0
-        start_city = cities[city_counter]
+        city_counter = initial_start_city
+        curr_city = cities[city_counter]
         city_counter += 1
-        curr_city = start_city
         route.append(curr_city)
 
         while not foundTour and time.time() - start_time < time_allowance:
@@ -331,10 +330,19 @@ class TSPSolver:
         solutions = []
         num_children = generations_limit * 2
 
+        # First generation -- random
+        # If we keep this, we get the same solution regularly -- if we take it out, we get random solutions
         for i in range(num_children):
             random_solution = TSPSolver.defaultRandomTour(self)['soln']
             new_solution = GA_Solution(random_solution.route, random_solution.cost)
             solutions.append(new_solution)
+
+        # first generation -- greedy
+        for i in range(ncities):
+            greedy_solution = TSPSolver.greedy(self, time_allowance, i)['soln']
+            if greedy_solution != math.inf:
+                new_solution = GA_Solution(greedy_solution.route, greedy_solution.cost)
+                solutions.append(new_solution)
 
         generations += 1
 
