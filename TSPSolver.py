@@ -2,15 +2,15 @@
 import math
 
 from which_pyqt import PYQT_VER
+
 if PYQT_VER == 'PYQT5':
     from PyQt5.QtCore import QLineF, QPointF
 elif PYQT_VER == 'PYQT4':
-	from PyQt4.QtCore import QLineF, QPointF
+    from PyQt4.QtCore import QLineF, QPointF
 elif PYQT_VER == 'PYQT6':
-	from PyQt6.QtCore import QLineF, QPointF
+    from PyQt6.QtCore import QLineF, QPointF
 else:
-	raise Exception('Unsupported Version of PyQt: {}'.format(PYQT_VER))
-
+    raise Exception('Unsupported Version of PyQt: {}'.format(PYQT_VER))
 
 import time
 import numpy as np
@@ -201,7 +201,9 @@ class TSPSolver:
         # Add our initial subproblem to the queue -- we use total_states made as our key for the dictionary
         state_subproblems_heap = []
         heapq.heapify(state_subproblems_heap)
-        heapq.heappush(state_subproblems_heap, ((initial_subproblem.cost_of_matrix / initial_subproblem.state_level * 2), initial_subproblem.state_id, initial_subproblem))
+        heapq.heappush(state_subproblems_heap, (
+        (initial_subproblem.cost_of_matrix / initial_subproblem.state_level * 2), initial_subproblem.state_id,
+        initial_subproblem))
         total_states_made += 1
 
         # while there are states in the queue and we haven't run out of time
@@ -262,7 +264,8 @@ class TSPSolver:
                         states_pruned += 1
 
                 elif new_matrix.cost_of_matrix < bssf_matrix.cost_of_matrix:
-                    heapq.heappush(state_subproblems_heap, ((new_matrix.cost_of_matrix / (new_matrix.state_level * 2)), new_matrix.state_id, new_matrix))
+                    heapq.heappush(state_subproblems_heap, (
+                    (new_matrix.cost_of_matrix / (new_matrix.state_level * 2)), new_matrix.state_id, new_matrix))
                 else:
                     states_pruned += 1
 
@@ -322,9 +325,9 @@ class TSPSolver:
 
         # This controls how long and deep we want our GA to search for
         generations = 0
-        generations_limit = 51
+        generations_limit = ncities * 3
         solutions = []
-        num_children = 100
+        num_children = ncities * 6
 
         for i in range(num_children):
             random_solution = TSPSolver.defaultRandomTour(self)['soln']
@@ -350,7 +353,7 @@ class TSPSolver:
                     foundTour = True
                     bssf_updated_count += 1
 
-            solutions = self.survival(solutions)
+            solutions = self.survival(solutions, ncities)
             generations += 1
 
         # This checks that our greedy algorithm wasn't the optimal solution
@@ -374,20 +377,21 @@ class TSPSolver:
 
         random_num = random.randint(0, 100)
         if generation <= 1:
-            mutate_amount = 25
+            mutate_amount = 100
         elif generation <= (generation_limit // 4):
-            mutate_amount = 50
+            mutate_amount = 90
         elif generation <= (generation_limit // 2):
             mutate_amount = 75
         elif generation <= (generation_limit // 1.5):
-            mutate_amount = 85
+            mutate_amount = 50
         else:
-            mutate_amount = 95
+            mutate_amount = 25
 
         if random_num < mutate_amount:
             index1 = random.randint(0, len(route.cities_visited) - 1)
             index2 = random.randint(0, len(route.cities_visited) - 1)
-            route.cities_visited[index1], route.cities_visited[index2] = route.cities_visited[index2], route.cities_visited[
+            route.cities_visited[index1], route.cities_visited[index2] = route.cities_visited[index2], \
+            route.cities_visited[
                 index1]
 
             route.calculate_cost()
@@ -403,7 +407,6 @@ class TSPSolver:
         child_route1 = GA_Solution()
         child_route2 = GA_Solution()
 
-        # todo: how to append lists as items instead of lists
         for i in range(len(parent1.cities_visited)):
             if parent2.cities_visited[i] not in spliced_route1:
                 child_route1.cities_visited.append(parent2.cities_visited[i])
@@ -418,8 +421,8 @@ class TSPSolver:
 
         return child_route1, child_route2
 
-    def survival(self, list_of_children):
-        number_of_wanted_children = 10
+    def survival(self, list_of_children, ncities):
+        number_of_wanted_children = ncities * 6
 
         survivors = []
         bucket_size = len(list_of_children)
@@ -450,11 +453,3 @@ class TSPSolver:
                 survivors.extend(random.choices(player, weights))
 
         return survivors
-
-
-
-
-
-
-
-
