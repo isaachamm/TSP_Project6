@@ -98,7 +98,6 @@ class TSPSolver:
         #   different routes, so this helps us find a route if our initial attempt doesn't work
         city_counter = initial_start_city
         curr_city = cities[city_counter]
-        city_counter += 1
         route.append(curr_city)
 
         while not foundTour and time.time() - start_time < time_allowance:
@@ -124,10 +123,10 @@ class TSPSolver:
                         foundTour = True
                         break
 
-                start_city = cities[city_counter]
                 city_counter += 1
                 if city_counter >= ncities - 1:
                     break
+                start_city = cities[city_counter]
                 curr_city = start_city
                 route.clear()
                 route.append(curr_city)
@@ -325,10 +324,12 @@ class TSPSolver:
         # This controls how long and deep we want our GA to search for
         generations = 0
         generations_limit = round((0.0000233385 * (ncities ** 5)) + 23.0863)
+        generations_limit = 2
         # generations_limit = round((0.011492 * (ncities ** 3)) + 7.59556)
         # generations_limit = ncities * 9
         solutions = []
         num_children = generations_limit * 2
+        num_children = round((0.0000233385 * (ncities ** 5)) + 23.0863) * 2
 
         # First generation -- random
         # If we keep this, we get the same solution regularly -- if we take it out, we get random solutions
