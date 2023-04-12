@@ -348,8 +348,13 @@ class TSPSolver:
         print(generations_limit)
 
         # big O n11
+        no_change_in_ten = False
+        gens_not_changed = 0
+        # while generations != generations_limit and time.time() - start_time < time_allowance: #n5
+        while not no_change_in_ten:
+            did_change = False
 
-        while generations != generations_limit and time.time() - start_time < time_allowance: #n5
+            print(generations)
             for i in range(num_children): #n
                 child_solution = self.mutation(solutions[i], generations, generations_limit)
                 solutions.append(child_solution)
@@ -366,6 +371,15 @@ class TSPSolver:
                     bssf = TSPSolution(solution.cities_visited.copy())
                     foundTour = True
                     bssf_updated_count += 1
+                    did_change = True
+
+            if did_change:
+                gens_not_changed = 0
+            else:
+                gens_not_changed += 1
+
+            if gens_not_changed == 10:
+                no_change_in_ten = True
 
             solutions = self.survival(solutions, num_children) #n6 space
             generations += 1
