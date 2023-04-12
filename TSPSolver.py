@@ -345,25 +345,29 @@ class TSPSolver:
                 solutions.append(new_solution)
 
         generations += 1
+        print(generations_limit)
 
-        while generations != generations_limit and time.time() - start_time < time_allowance:
-            for i in range(num_children):
+        # big O n11
+
+        while generations != generations_limit and time.time() - start_time < time_allowance: #n5
+            for i in range(num_children): #n
                 child_solution = self.mutation(solutions[i], generations, generations_limit)
                 solutions.append(child_solution)
 
-            for i in range(num_children - 1):
+            for i in range(num_children - 1): #n5
                 solutions.extend(self.crossover(solutions[i], solutions[i + 1]))
 
             for solution in solutions:
                 if solution.cost_of_solution == math.inf:
                     solutions.remove(solution)
                 elif solution.cost_of_solution < bssf_solution.cost_of_solution:
+                    print(f'bssf changed to {solution.cost_of_solution} from {bssf_solution.cost_of_solution} at {generations}')
                     bssf_solution = GA_Solution(solution.cities_visited.copy(), solution.cost_of_solution)
                     bssf = TSPSolution(solution.cities_visited.copy())
                     foundTour = True
                     bssf_updated_count += 1
 
-            solutions = self.survival(solutions, num_children)
+            solutions = self.survival(solutions, num_children) #n6 space
             generations += 1
 
         # This checks that our greedy algorithm wasn't the optimal solution
@@ -417,7 +421,7 @@ class TSPSolver:
         child_route1 = GA_Solution()
         child_route2 = GA_Solution()
 
-        for i in range(len(parent1.cities_visited)):
+        for i in range(len(parent1.cities_visited)): #n
             if parent2.cities_visited[i] not in spliced_route1:
                 child_route1.cities_visited.append(parent2.cities_visited[i])
             if parent1.cities_visited[i] not in spliced_route2:
